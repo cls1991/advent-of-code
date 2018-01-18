@@ -5,26 +5,18 @@ from itertools import combinations
 
 def corruption_checksum_v1(data):
     """Corruption Checksum."""
-    ma, mi = 0, 10000000
-    for num in data.split('\t'):
-        t = int(num)
-        if t > ma:
-            ma = t
-        if t < mi:
-            mi = t
-
-    return ma - mi
+    array = list(map(int, data.split('\t')))
+    return max(array) - min(array)
 
 
 def corruption_checksum_v2(data):
     """Corruption Checksum."""
     sa = 0
-    for a, b in combinations(data.split('\t'), 2):
-        ta, tb = int(a), int(b)
-        if ta % tb == 0:
-            sa += ta / tb
-        elif tb % ta == 0:
-            sa += tb / ta
+    for a, b in combinations(list(map(int, data.split('\t'))), 2):
+        if a % b == 0:
+            sa += a / b
+        elif b % a == 0:
+            sa += b / a
 
     return sa
 

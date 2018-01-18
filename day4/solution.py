@@ -18,12 +18,7 @@ def high_entropy_passphrases_v2(s):
     """Check whether a sequece is a valid passphrase."""
     mmap = {}
     for word in s.split(' '):
-        m = {}
-        for letter in word:
-            if letter not in m:
-                m[letter] = 0
-            m[letter] += 1
-        k = hash(tuple(sorted(m.iteritems())))
+        k = ''.join(list(sorted(word)))
         if k not in mmap:
             mmap[k] = 0
         mmap[k] += 1
