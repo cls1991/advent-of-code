@@ -1,43 +1,41 @@
 # coding: utf8
 
+from itertools import combinations
+
 
 def corruption_checksum_v1(data):
-    """Part One"""
-    ma, mi = 0, 100000
-    ep = [int(a) for a in data.split('\t')]
-    for n in ep:
-        if n < mi:
-            mi = n
-        if n > ma:
-            ma = n
+    """Corruption Checksum."""
+    ma, mi = 0, 10000000
+    for num in data.split('\t'):
+        t = int(num)
+        if t > ma:
+            ma = t
+        if t < mi:
+            mi = t
 
     return ma - mi
 
 
 def corruption_checksum_v2(data):
-    """Part Two"""
-    ep = [int(a) for a in data.split('\t')]
-    lg = len(ep)
+    """Corruption Checksum."""
     sa = 0
-    for i in xrange(lg):
-        for j in xrange(i + 1, lg):
-            if ep[i] * ep[j] == 0:
-                continue
-            if ep[i] >= ep[j] and ep[i] % ep[j] == 0:
-                sa += ep[i] / ep[j]
-            elif ep[i] < ep[j] and ep[j] % ep[i] == 0:
-                sa += ep[j] / ep[i]
+    for a, b in combinations(data.split('\t'), 2):
+        ta, tb = int(a), int(b)
+        if ta % tb == 0:
+            sa += ta / tb
+        elif tb % ta == 0:
+            sa += tb / ta
 
     return sa
 
 
 if __name__ == '__main__':
-    s1 = 0
-    s2 = 0
+    total_v1 = total_v2 = 0
     with open('input.txt', 'r') as f:
-        for l in f.readlines():
-            s1 += corruption_checksum_v1(l)
-            s2 += corruption_checksum_v2(l)
+        for line in f.readlines():
+            total_v1 += corruption_checksum_v1(line.strip())
+            total_v2 += corruption_checksum_v2(line.strip())
 
-    print('Solution of Day 2 Part One: {0}'.format(s1))
-    print('Solution of Day 2 Part Two: {0}'.format(s2))
+    print('Solution of Day 2 Part One: {0}'.format(total_v1))
+    print('Solution of Day 2 Part Two: {0}'.format(total_v2))
+
