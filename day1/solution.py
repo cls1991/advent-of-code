@@ -16,11 +16,11 @@ def inverse_captcha_v2(data):
     """Inverse Captcha."""
     total = 0
     ll = len(data)
-    for i in range(0, ll):
-        if data[i] == data[(i + ll / 2) % ll]:
+    for i in range(0, ll / 2):
+        if data[i] == data[i + ll / 2]:
             total += int(data[i])
 
-    return total
+    return 2 * total
 
 
 if __name__ == '__main__':
