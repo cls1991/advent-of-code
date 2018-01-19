@@ -1,34 +1,76 @@
 # coding: utf8
 
-import operator
 import re
 
-PATTERN = re.compile(r'([a-z]+) \((\d+)\)')
+PATTERN = re.compile(r'(?P<program>[a-z]+) \((?P<weight>\d+)\)( -> )?(?P<children>[a-z, ]+)?')
 
 
-def recursive_circus_v1(s):
+def recursive_circus_v1(circuits):
     """Recursive Circus."""
-    ts = s[:]
-    circus = {}
-    for c in ts:
-        t = c.split(' -> ')
-        parent_edge = t[0].split(' ')[0]
-        if parent_edge not in circus:
-            circus[parent_edge] = 0
-        if len(t) > 1:
-            for edge in t[1].split(', '):
-                if edge not in circus:
-                    circus[edge] = 0
-                circus[edge] += 1
+    programs = {}
+    for name in circuits.keys():
+        programs[name] = 0
+    for circuit in circuits.values():
+        if 'children' in circuit:
+            for child in circuit['children']:
+                programs[child] += 1
 
-    circus_sorted = sorted(circus.items(), key=operator.itemgetter(1))
+    for name, count in programs.items():
+        if count == 0:
+            return name
 
-    return circus_sorted[0][0]
+    raise ValueError('No bottom program found!')
+
+
+def recursive_circus_v2(circuits):
+    """Recursive Circus."""
+
+    def calc_weight(program):
+        weight = circuits[program]['weight']
+        if 'children' in circuits[program]:
+            for child in circuits[program]['children']:
+                weight += calc_weight(child)
+
+        return weight
+
+    def check_balance(program):
+        weights = {}
+        if 'children' in circuits[program]:
+            for child in circuits[program]['children']:
+                check_balance(child)
+                weight = calc_weight(child)
+                if weight not in weights:
+                    weights[weight] = []
+                weights[weight].append(child)
+
+            if len(set(weights.keys())) > 1:
+                unbalanced_weight = normal_weight = 0
+                for weight, programs in weights.items():
+                    if len(programs) == 1:
+                        unbalanced_weight = weight
+                    else:
+                        normal_weight = weight
+
+                unbalanced_program = weights[unbalanced_weight][0]
+                balance_weight = circuits[unbalanced_program]['weight'] + normal_weight - unbalanced_weight
+                circuits[unbalanced_program]['weight'] = balance_weight
+                print('Solution of Day 7 Part Two: {0}'.format(balance_weight))
+
+    bottom_program = recursive_circus_v1(circuits)
+    check_balance(bottom_program)
 
 
 if __name__ == '__main__':
+    circuits = {}
     with open('input.txt', 'r') as f:
-        test = f.read().strip().split('\n')
+        for m in re.finditer(PATTERN, f.read().strip()):
+            name = m.group('program')
+            weight = m.group('weight')
+            children = m.group('children')
+            circuits[name] = {'weight': int(weight)}
+            if children:
+                circuits[name]['children'] = children.split(', ')
 
-    print('Solution of Day 7 Part One: {0}'.format(recursive_circus_v1(test)))
+    print('Solution of Day 7 Part One: {0}'.format(recursive_circus_v1(circuits)))
+    recursive_circus_v2(circuits)
 
